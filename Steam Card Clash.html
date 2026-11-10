@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Steam Card Clash</title>
+<style>
+:root{--bg:#f4f1ea;--sf:#fff;--tx:#1d1b18;--mu:#6b665e;--ac:#1b6ef3;--bd:#d9d4c8;--gn:#2e9e5b;--s1:#58687a;--s2:#9a8556;--s3:#6f7480;--pl:#f6f2ea;--pt:#1d1b18;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14161a;--sf:#1f2329;--tx:#eceae4;--mu:#9a968c;--ac:#5b9bff;--bd:#33383f;--gn:#4cc47f;--s1:#35404d;--s2:#6b5b38;--s3:#444853}}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+#app{max-width:520px;margin:0 auto;padding:16px}
+h1{font-size:24px;margin:8px 0}h2{font-size:18px;margin:12px 0 8px}
+.mu{color:var(--mu);font-size:14px}
+button{font:inherit;color:var(--tx);background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:10px 8px;cursor:pointer}
+button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+button:disabled{opacity:.4;cursor:not-allowed}
+.col{display:flex;flex-direction:column;gap:10px}.row{display:flex;gap:8px}.row>*{flex:1}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.card{background:var(--sf);border:2px solid var(--bd);border-radius:12px;padding:10px;text-align:center}
+.card.sel{border-color:var(--ac);box-shadow:0 0 0 2px var(--ac)}
+.card .em{font-size:34px}.card b{display:block}
+.r-Common{border-top:5px solid #9a968c}.r-Rare{border-top:5px solid #3b82f6}.r-Epic{border-top:5px solid #a855f7}.r-Foil{border-top:5px solid #f59e0b}
+.st{font-size:13px;color:var(--mu)}
+.tag{font-size:12px;padding:1px 6px;border-radius:6px;background:var(--bd)}
+.note{background:var(--sf);border:1px dashed var(--bd);border-radius:10px;padding:10px;font-size:13px;color:var(--mu)}
+.log{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:8px;height:96px;overflow:auto;font-size:14px;margin:10px 0}
+.env{font-size:13px;margin:4px 0 6px}.scene{background:linear-gradient(var(--s1),var(--s2) 50%,var(--s3));border-radius:18px;padding:10px;color:#fff;overflow:hidden}
+.top{display:flex;justify-content:space-between}.top>div{display:flex;gap:5px}
+.ic{width:34px;height:34px;border-radius:50%;border:3px solid #3fbf6f;background:#f6f2ea;display:flex;align-items:center;justify-content:center;font-size:18px}
+.ic.act{border-color:#4aa8ff;box-shadow:0 0 8px #4aa8ff}.ic.ko{border-color:#8a6a6a;background:#6b5a5a;color:#ddd;font-size:14px}
+.arena{position:relative;height:350px}
+.blk{position:absolute;left:0;right:0;height:165px}.foe{top:6px}.me{top:176px}
+.ball{position:absolute;font-size:70px;line-height:1;filter:drop-shadow(0 6px 4px rgba(0,0,0,.35))}
+.foe .ball{right:14%;top:10px}.me .ball{left:12%;top:16px}
+.rock{position:absolute;width:160px;height:46px;border-radius:50%;background:radial-gradient(#6a7490,#2f3750);box-shadow:0 8px 0 #262c42}
+.foe .rock{right:7%;top:82px}.me .rock{left:5%;top:92px}
+.pw{position:absolute;width:56%;z-index:2}.foe .pw{left:0;top:50px}.me .pw{right:0;top:66px}
+.plate{background:var(--pl);color:var(--pt);border:3px solid #1c1c1c;border-radius:12px;padding:6px 8px;position:relative}
+.nm{display:flex;align-items:center;gap:5px;font-size:14px;white-space:nowrap;overflow:hidden}
+.ty{width:22px;height:22px;border-radius:50%;background:#e8c14a;border:2px solid #b8902a;display:inline-flex;align-items:center;justify-content:center;font-size:12px;flex:none}
+.hb{height:12px;background:#ccc6b8;border-radius:6px;overflow:hidden;display:flex;margin:5px 0 0;border:1px solid #1c1c1c}
+.hb .g{background:#35c26a}.hb .b{background:#5aa0ff}
+.pc{display:block;text-align:right;font-weight:800;font-size:20px;color:#2f7bff;line-height:1}
+.stt{display:inline-block;background:var(--pl);color:var(--pt);border:2px solid #1c1c1c;border-radius:0 0 8px 8px;padding:0 10px;font-weight:700;font-size:14px;margin-left:12px}
+.bdg{position:absolute;top:-24px;right:0;font-size:11px;font-weight:800;background:var(--pl);color:var(--pt);border:2px solid #1c1c1c;border-radius:12px;padding:1px 8px;letter-spacing:.5px}
+.bdg.y{background:#f5c542;right:auto;left:0}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ab{position:relative;text-align:left;color:#fff;border:2px solid rgba(255,255,255,.3);border-radius:16px;padding:12px 12px;line-height:1.2}
+.ab b{display:block;font-size:20px}.ab span{font-size:14px;opacity:.85}
+.ab.bl{background:linear-gradient(#41668f,#2d4766)}.ab.wp{background:linear-gradient(#41668f,#2d4766)}
+.ab.sw{background:linear-gradient(#6a4bb5,#47318a)}.ab.at{background:linear-gradient(#9a4268,#6d2d4a)}
+.ab:disabled{filter:grayscale(.7);opacity:.6}
+.pip{display:inline-block;width:10px;height:10px;border-radius:50%;border:2px solid #fff;margin-right:4px}.pip.on{background:#fff}
+.mb{position:absolute;top:-12px;right:6px;font-size:13px;font-weight:800;color:#fff;border:2px solid #1c1c1c;border-radius:12px;padding:0 8px}
+.mb.up{background:#2e9e5b}.mb.dn{background:#e08a1e}
+.tl{height:6px;background:rgba(0,0,0,.3);border-radius:3px;margin-top:10px}.tl i{display:block;height:100%;background:#f5b014;border-radius:3px}
+.sq{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
+.chip{padding:6px 2px;font-size:12px;line-height:1.2}.chip .e{font-size:22px;display:block}
+</style></head><body><div id="app"></div>
+<script>
+const EL={Fire:'🔥',Water:'💧',Nature:'🌿'};
+const BEATS={Fire:'Nature',Nature:'Water',Water:'Fire'};
+const FX={burn:'🔥 Burn',weak:'⬇️ Weaken',stun:'💫 Stun'};
+const CARDS=[
+{id:1,name:'Gordon’s Crowbar',em:'🔧',el:'Nature',r:'Common',atk:9,def:5,hp:40,spd:6,sk:'Headcrab Smash',fx:'stun'},
+{id:2,name:'Portal Cake',em:'🍰',el:'Fire',r:'Rare',atk:12,def:3,hp:34,spd:7,sk:'Lie Bomb',fx:'burn'},
+{id:3,name:'Heavy’s Sandvich',em:'🥪',el:'Nature',r:'Common',atk:7,def:8,hp:52,spd:3,sk:'Mighty Munch',fx:'weak'},
+{id:4,name:'Dota Courier',em:'🦅',el:'Water',r:'Common',atk:8,def:4,hp:38,spd:10,sk:'Speed Dash',fx:'weak'},
+{id:5,name:'Companion Cube',em:'🧊',el:'Water',r:'Rare',atk:6,def:11,hp:48,spd:2,sk:'Cold Shoulder',fx:'stun'},
+{id:6,name:'Spy’s Butterfly',em:'🦋',el:'Fire',r:'Epic',atk:14,def:4,hp:32,spd:9,sk:'Backstab',fx:null},
+{id:7,name:'Golden Pan',em:'🍳',el:'Fire',r:'Foil',atk:13,def:7,hp:44,spd:5,sk:'Gilded Slam',fx:'burn'},
+{id:8,name:'Lambda Core',em:'🌀',el:'Water',r:'Epic',atk:11,def:6,hp:42,spd:6,sk:'Resonance Cascade',fx:'burn'}];
+const $=document.getElementById('app');
+const SQ=5,MAXT=22;let NM={me:false,en:false};
+let S={picks:[],mode:null,floor:1,team:null,B:null};
+const mult=(a,d)=>BEATS[a]===d?1.5:BEATS[d]===a?0.7:1;
+const alive=t=>t.map((c,i)=>c.hp>0?i:-1).filter(i=>i>=0);
+const ko=t=>t.filter(c=>c.hp<=0).length;
+function mk(c,m=1){return{...c,atk:Math.round(c.atk*m),hp:Math.round(c.hp*m),max:Math.round(c.hp*m),sh:Math.round(c.hp*m*.25),uses:2,st:{burn:0,weak:0,stun:0}}}
+
+function menu(){
+$.innerHTML=`<h1>🃏 Steam Card Clash</h1><p class="mu">1v1 turn-based battles with a squad of 5 trading cards. No healing.</p>
+<div class="col"><button class="p" onclick="alert('Steam sign-in needs a server (OpenID + Steam Web API). This prototype uses test cards.')">Sign in with Steam</button>
+<div class="note">Test mode: 8 sample cards loaded.</div>
+<h2>Choose a mode</h2>
+<button onclick="pick('dungeon')">🏰 Dungeon (3 floors, damage carries over)</button>
+<button onclick="pick('ai')">🤖 Duel vs AI</button>
+<button disabled>🌐 Players (coming soon)</button></div>`}
+function pick(m){S.mode=m;S.picks=[];teamScreen()}
+function teamScreen(){
+$.innerHTML=`<h1>Pick ${SQ} cards</h1><p class="mu">Your first pick leads the battle.</p><div class="grid">${CARDS.map(c=>{const n=S.picks.indexOf(c.id);return`<div class="card r-${c.r} ${n>=0?'sel':''}" onclick="tog(${c.id})"><div class="em">${c.em}</div><b>${c.name}</b><span class="tag">${EL[c.el]} ${c.r}${n>=0?' · #'+(n+1):''}</span><div class="st">ATK ${c.atk} · DEF ${c.def}<br>HP ${c.hp} · SPD ${c.spd}</div><div class="st">✨ ${c.sk}${c.fx?' ('+FX[c.fx]+')':''}</div></div>`}).join('')}</div>
+<div class="row" style="margin-top:12px"><button onclick="menu()">Back</button><button class="p" ${S.picks.length==SQ?'':'disabled'} onclick="start()">Fight (${S.picks.length}/${SQ})</button></div>`}
+function tog(id){const i=S.picks.indexOf(id);if(i>=0)S.picks.splice(i,1);else if(S.picks.length<SQ)S.picks.push(id);teamScreen()}
+function start(){S.floor=1;S.team=S.picks.map(id=>mk(CARDS.find(c=>c.id==id)));newBattle()}
+function newBattle(){
+const m=1+.15*(S.floor-1);
+S.team.forEach(c=>{c.st={burn:0,weak:0,stun:0}});
+const en=[...CARDS].sort(()=>Math.random()-.5).slice(0,SQ).map(c=>mk(c,m));
+S.B={env:ENVS[Math.floor(Math.random()*ENVS.length)],me:S.team,en,mi:alive(S.team)[0],ei:0,turn:1,log:['Battle begins!'],over:false,forced:false,mLast:false,eLast:false};
+battle()}
+const hpBar=c=>`<div class="bar"><i style="width:${Math.max(0,c.hp/c.max*100)}%"></i></div>`;
+const pips=n=>[1,2].map(i=>`<span class="pip ${i<=n?'on':''}"></span>`).join('');
+const stx=c=>Object.keys(c.st).filter(k=>c.st[k]>0).map(k=>FX[k].split(' ')[0]).join('');
+const bar2=c=>{const T=c.max*1.25;return`<div class="hb"><i class="g" style="width:${Math.max(0,c.hp)/T*100}%"></i><i class="b" style="width:${Math.max(0,c.sh)/T*100}%"></i></div>`};
+const ico=(t,ai)=>t.map((c,i)=>`<span class="ic ${c.hp<=0?'ko':i==ai?'act':''}">${c.hp<=0?'✕':c.em}</span>`).join('');
+function plate(c,mo,nb){
+const pct=Math.round((Math.max(0,c.hp)+Math.max(0,c.sh))/c.max*100);
+return`<div class="plate">${mo?'<span class="bdg y">MOMENTUM</span>':''}${nb?'<span class="bdg">🛡 NO BLOCK</span>':''}<div class="nm"><span class="ty">${EL[c.el]}</span><b>${c.name}</b> ${stx(c)}</div>${bar2(c)}<span class="pc">${pct}%</span></div><div class="stt">${c.atk} · ${c.def} · ${c.spd}</div>`}
+function battle(){
+const B=S.B,me=B.me[B.mi],en=B.en[B.ei];
+const mu=mult(me.el,en.el),res=alive(B.me).length-1;
+const tray=B.me.map((c,i)=>`<button class="chip" ${c.hp<=0||(i==B.mi&&!B.forced)||B.over?'disabled':''} onclick="${B.forced?'forceSwap('+i+')':`turn('swap',${i})`}"><span class="e">${c.em}</span>${EL[c.el]} ${Math.max(0,Math.round(c.hp/c.max*100))}%</button>`).join('');
+const badge=mu>1?'<span class="mb up">▲ +50%</span>':mu<1?'<span class="mb dn">▼ −30%</span>':'';
+const ctl=B.forced?`<b>${me.name} fainted. Choose who comes in:</b>`:`<div class="acts">
+<button class="ab bl" ${B.mLast?'disabled':''} onclick="turn('blk')"><b>Block</b><span>${B.mLast?'Not this round':'Ready'}</span></button>
+<button class="ab wp" ${me.uses>0?'':'disabled'} onclick="turn('sp')"><b>Weapon</b><span>${me.sk}<br>${pips(me.uses)}</span></button>
+<button class="ab sw" ${B.mSw||res<1?'disabled':''} onclick="S.B.tray=!S.B.tray;battle()"><b>Swap</b><span>${B.mSw?'Not this round':res+' in reserve'}</span></button>
+<button class="ab at" onclick="turn('atk')">${badge}<b>Attack</b><span>Energy</span></button></div>`;
+$.innerHTML=`<div class="mu">${S.mode=='dungeon'?'Floor '+S.floor+'/3 · ':''}Turn ${Math.min(B.turn,MAXT)}/${MAXT}</div>
+<div class="env">${B.env.em} <b>${B.env.n}</b> · ${EL[B.env.el]} types deal +20% damage here</div><div class="scene" style="--s1:${B.env.c[0]};--s2:${B.env.c[1]};--s3:${B.env.c[2]}"><div class="top"><div>${ico(B.me,B.mi)}</div><div>${ico(B.en,B.ei)}</div></div>
+<div class="arena"><div class="blk foe"><div class="rock"></div><div class="ball">${en.em}</div><div class="pw">${plate(en,B.eMom,B.eLast)}</div></div>
+<div class="blk me"><div class="rock"></div><div class="ball">${me.em}</div><div class="pw">${plate(me,B.mMom,B.mLast)}</div></div></div>
+${ctl}${B.forced||B.tray?`<div class="sq">${tray}</div>`:''}
+<div class="tl"><i style="width:${Math.min(100,(B.turn-1)/MAXT*100)}%"></i></div></div>
+<div class="log" id="lg">${B.log.map(l=>'<div>'+l+'</div>').join('')}</div>
+<p class="st">🔥>🌿>💧>🔥. Blue bar = extra HP (+25%), soaks damage first. The arena boosts its type’s damage by 20%. Order: swap, block, momentum attack, normal attack, item. Block negates normal attacks and earns ⚡Momentum; the item (2 uses) breaks blocks. Lose 3 balls and the battle is over. Burn 10%/turn, Weaken −30% ATK, Stun skips an action. Turn ${MAXT}: most KOs wins, then most HP.</p>`;
+const lg=document.getElementById('lg');lg.scrollTop=lg.scrollHeight;
+if(B.fall){for(const w in B.fall){const el=document.querySelector(w=='me'?'.me .ball':'.foe .ball');if(el)el.animate([{transform:'translateY(-480px)'},{transform:'none',offset:.7},{transform:'translateY(-22px)',offset:.85},{transform:'none'}],{duration:520,easing:'ease-in'})}B.fall=null}}
+function aiPick(B){
+const me=B.me[B.mi],en=B.en[B.ei],others=alive(B.en).filter(i=>i!=B.ei);
+const bad=mult(en.el,me.el)<1||mult(me.el,en.el)>1;
+if(bad&&others.length&&!B.eSw&&Math.random()<.35){
+others.sort((a,b)=>mult(B.en[b].el,me.el)-mult(B.en[a].el,me.el));return{t:'swap',i:others[0]}}
+if(en.uses>0&&Math.random()<.3)return{t:'sp'};
+if(!B.eLast&&Math.random()<(B.eMom?0:.15)+(B.mMom?.45:0))return{t:'blk'};
+return{t:'atk'}}
+const ENVS=[
+{n:'GLaDOS Test Chamber',em:'🧪',el:'Water',c:['#7f98a8','#c6d3da','#6a7f8c']},
+{n:'Combine Citadel',em:'🏙️',el:'Fire',c:['#2a3550','#6b7a99','#3a3f52']},
+{n:'2Fort',em:'🏰',el:'Nature',c:['#6aa0d4','#c9a35f','#7a6a4a']},
+{n:'Dustbowl',em:'🏜️',el:'Fire',c:['#d9a05b','#c07a3a','#8a5a33']},
+{n:'Xen',em:'🌌',el:'Nature',c:['#1d2a4a','#4a3a8a','#2a6a5a']},
+{n:'Swamp Fever',em:'🐊',el:'Water',c:['#3d5a40','#6b7a3a','#3a4a3a']},
+{n:'Black Mesa',em:'☢️',el:'Fire',c:['#8a6a3a','#d8a050','#4a3a2a']},
+{n:'Ravenholm',em:'🕸️',el:'Nature',c:['#3a3a4a','#6a5a50','#2a2a30']},
+{n:'Borealis',em:'🚢',el:'Water',c:['#2a4a6a','#7aa8c8','#3a5a7a']}];
+let EV=[],BRK={me:false,en:false};
+function dmg(a,d){return Math.max(1,Math.round(a.atk*(a.st.weak>0?.7:1)*(S.B.env.el==a.el?1.2:1)*mult(a.el,d.el)-d.def*.5)+1)}
+function hurt(d,v){let r=v;const ab=Math.min(d.sh,r);d.sh-=ab;r-=ab;d.hp-=r}
+function strike(B,a,d,sp,blk,who){
+const w=who=='You:'?'me':'en',m=mult(a.el,d.el),nb=blk&&!sp;
+const v=nb?0:Math.max(1,Math.round(dmg(a,d)*(sp?.8:1)));hurt(d,v);
+let s=`${who} ${a.name} ${sp?'uses '+a.sk:'attacks'} `+(nb?'but it is fully blocked! ⚡Momentum!':`for ${v}.${m>1?' Super effective!':m<1?' Not very effective…':''}`);
+if(nb)NM[w=='me'?'en':'me']=true;
+if(sp){a.uses--;if(blk){s+=' 🛡 Block broken!';BRK[w=='me'?'en':'me']=true}
+if(a.fx&&d.hp>0){d.st[a.fx]=a.fx=='stun'?1:3;s+=' '+FX[a.fx]+'!'}}
+EV.push({t:sp?'sp':'atk',w,v,blk:nb,brk:sp&&blk});B.log.push(s)}
+function play(ev,done){
+let t=0;const bub={},q=x=>document.querySelector(x);
+ev.forEach(e=>{
+setTimeout(()=>{
+const me=e.w=='me',A=q(me?'.me .ball':'.foe .ball'),D=q(me?'.foe .ball':'.me .ball');
+if(!A||!D)return;
+if(e.t=='swap'){A.style.zIndex=3;const up=A.animate([{transform:'none'},{transform:'translateY(-480px)'}],{duration:420,easing:'ease-in',fill:'forwards'});setTimeout(()=>{up.cancel();A.textContent=e.em;A.animate([{transform:'translateY(-480px)'},{transform:'none',offset:.7},{transform:'translateY(-22px)',offset:.85},{transform:'none'}],{duration:480,easing:'ease-in'}).onfinish=()=>A.style.zIndex=''},430);return}
+if(e.t=='blk'){const b=document.createElement('div');b.style.cssText=`position:absolute;width:124px;height:124px;border-radius:50%;left:${A.offsetLeft+A.offsetWidth/2-62}px;top:${A.offsetTop+A.offsetHeight/2-62}px;background:radial-gradient(circle at 30% 28%,rgba(255,255,255,.4),rgba(90,160,255,.16) 55%,rgba(90,160,255,.38));border:2px solid rgba(170,215,255,.75);box-shadow:0 0 20px rgba(90,160,255,.65),inset 0 0 18px rgba(150,200,255,.45);z-index:4;pointer-events:none`;A.parentElement.appendChild(b);bub[e.w]=b;b.animate([{transform:'scale(.3)',opacity:0},{transform:'scale(1.12)',opacity:1,offset:.7},{transform:'scale(1)',opacity:1}],{duration:300});return}
+const k=me?1:-1;A.style.zIndex=3;
+A.animate([{transform:'none'},{transform:`translate(${-k*18}px,${k*10}px) scale(.95)`,offset:.2},{transform:`translate(${k*110}px,${-k*90}px) scale(${e.t=='sp'?1.45:1.2})`,offset:.5},{transform:'none'}],{duration:620,easing:'ease-in-out'}).onfinish=()=>A.style.zIndex='';
+setTimeout(()=>{
+const dk=me?'en':'me',bb=bub[dk];if(bb){if(e.brk){bb.animate([{transform:'scale(1)',opacity:1},{transform:'scale(1.5)',opacity:0}],{duration:300}).onfinish=()=>bb.remove();delete bub[dk]}else if(e.blk)bb.animate([{transform:'scale(1)'},{transform:'scale(1.15)'},{transform:'scale(1)'}],{duration:300})}
+D.animate(e.blk?[{filter:'none'},{filter:'drop-shadow(0 0 18px #5aa0ff)'},{filter:'none'}]:[{transform:'none',filter:'none'},{transform:'translateX(-9px)',filter:'drop-shadow(0 0 12px #f33) brightness(1.6)'},{transform:'translateX(9px)'},{transform:'translateX(-5px)'},{transform:'none',filter:'none'}],{duration:340});
+const f=document.createElement('div');f.textContent=e.blk?'BLOCKED':'-'+e.v;
+f.style.cssText=`position:absolute;left:${D.offsetLeft}px;top:${D.offsetTop}px;font-weight:800;font-size:24px;color:#fff;text-shadow:0 2px 0 #000,0 0 6px ${e.blk?'#5aa0ff':'#f33'};z-index:5;pointer-events:none`;
+D.parentElement.appendChild(f);
+f.animate([{transform:'none',opacity:1},{transform:'translateY(-44px)',opacity:0}],{duration:600}).onfinish=()=>f.remove()},300)
+},t);
+t+=e.t=='swap'?950:e.t=='blk'?340:760});
+setTimeout(()=>Object.values(bub).forEach(b=>b.animate([{opacity:1},{opacity:0,transform:'scale(1.2)'}],{duration:280}).onfinish=()=>b.remove()),t);setTimeout(done,t+260)}
+function turn(t,i){
+const B=S.B;if(B.over||B.busy)return;
+B.tray=false;EV=[];NM={me:false,en:false};BRK={me:false,en:false};
+const A={me:{t,i},en:aiPick(B)};
+let me=B.me[B.mi],en=B.en[B.ei];
+const U={me,en},V={me:en,en:me},ws=['me','en'],oth=w=>w=='me'?'en':'me';
+const swapped={me:A.me.t=='swap',en:A.en.t=='swap'};
+if(swapped.me){B.mi=A.me.i;B.log.push(`You swap in ${B.me[B.mi].name}.`);EV.push({t:'swap',w:'me',em:B.me[B.mi].em})}
+if(swapped.en){B.ei=A.en.i;B.log.push(`Foe swaps in ${B.en[B.ei].name}.`);EV.push({t:'swap',w:'en',em:B.en[B.ei].em})}
+me=B.me[B.mi];en=B.en[B.ei];
+const mBlk=A.me.t=='blk',eBlk=A.en.t=='blk';
+if(mBlk){B.log.push(`You raise a shield with ${me.name}.`);EV.push({t:'blk',w:'me'})}
+if(eBlk){B.log.push(`${en.name} shields.`);EV.push({t:'blk',w:'en'})}
+if(B.mMom&&eBlk&&A.me.t=='atk')B.log.push('Your momentum strike is absorbed!');
+if(B.eMom&&mBlk&&A.en.t=='atk')B.log.push('Foe’s momentum strike is absorbed!');
+const acts=[];
+for(const w of ws){const x=A[w],a=w=='me'?me:en;
+if(x.t!='atk'&&x.t!='sp')continue;
+if(a.st.stun>0){a.st.stun--;B.log.push(`${a.name} is stunned and can’t act!`);continue}
+const sp=x.t=='sp'&&a.uses>0;
+acts.push({w,sp,c:sp?2:(w=='me'?B.mMom:B.eMom)?0:1,spd:a.spd+Math.random()})}
+acts.sort((p,q)=>p.c-q.c||q.spd-p.spd);
+for(const x of acts){
+if(me.hp<=0||en.hp<=0)break;
+if(x.w=='me')strike(B,me,en,x.sp,eBlk,'You:');else strike(B,en,me,x.sp,mBlk,'Foe:')}
+for(const a of [me,en]){
+if(a.hp>0&&a.st.burn>0){const b=Math.max(1,Math.round(a.max*.1));a.hp-=b;B.log.push(`${a.name} burns for ${b}.`)}
+for(const k of ['burn','weak'])if(a.st[k]>0)a.st[k]--}
+if(BRK.me)NM.me=false;if(BRK.en)NM.en=false;
+B.mLast=mBlk;B.eLast=eBlk;B.mSw=swapped.me;B.eSw=swapped.en;
+B.turn++;B.mMom=NM.me;B.eMom=NM.en;
+if(en.hp<=0){B.log.push(`${en.name} fainted!`);const a=alive(B.en);if(a.length){B.ei=a[0];B.fall={en:1};B.log.push(`Foe sends in ${B.en[B.ei].name}.`)}}
+if(me.hp<=0)B.log.push(`${me.name} fainted!`);
+let next;
+if(ko(B.en)>=3)next=()=>end(true);
+else if(ko(B.me)>=3)next=()=>end(false);
+else if(B.turn>MAXT){const f=t=>t.reduce((s,c)=>s+Math.max(0,c.hp)/c.max,0),k=t=>t.filter(c=>c.hp<=0).length,my=k(B.en),ft=k(B.me),byKO=my!=ft;
+next=()=>end(byKO?my>ft:f(B.me)>=f(B.en),byKO?`Turn limit reached: ${my} KOs for you vs ${ft} for the foe. `:'Turn limit reached with KOs tied: decided by remaining HP. ')}
+else{if(me.hp<=0)B.forced=true;next=battle}
+B.busy=true;
+play(EV,()=>{B.busy=false;next()})}
+function forceSwap(i){const B=S.B;B.mi=i;B.forced=false;B.mLast=false;B.mSw=false;B.fall={me:1};B.log.push(`You send in ${B.me[i].name}.`);battle()}
+function end(win,timeout){
+S.B.over=true;
+const nxt=win&&S.mode=='dungeon'&&S.floor<3;
+const msg=win?(nxt?`Floor ${S.floor} cleared!`:'🏆 Victory!'):'💀 Defeated';
+const left=alive(S.B.me).length;
+$.innerHTML=`<h1>${msg}</h1><p class="mu">${timeout||''}${nxt?`${left} of ${SQ} balls survive. There is no healing, so wounds carry over.`:'Thanks for playing the prototype.'}</p>
+<div class="col">${nxt?'<button class="p" onclick="S.floor++;newBattle()">Next floor</button>':'<button class="p" onclick="pick(S.mode)">Play again</button>'}<button onclick="menu()">Main menu</button></div>`}
+menu();
+</script></body></html>
