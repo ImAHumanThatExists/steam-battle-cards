@@ -19,7 +19,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .card.sel{border-color:var(--ac);box-shadow:0 0 0 2px var(--ac)}
 .card .em{font-size:34px}.card b{display:block}
 .r-Common{border-top:5px solid #9a968c}.r-Rare{border-top:5px solid #3b82f6}.r-Epic{border-top:5px solid #a855f7}.r-Foil{border-top:5px solid #f59e0b}
-.st{font-size:13px;color:var(--mu)}
+.st{font-size:13px;color:var(--mu)}.ci{height:1em;width:auto;max-width:1.3em;object-fit:contain;vertical-align:middle;border-radius:6px}
 .tag{font-size:12px;padding:1px 6px;border-radius:6px;background:var(--bd)}
 .note{background:var(--sf);border:1px dashed var(--bd);border-radius:10px;padding:10px;font-size:13px;color:var(--mu)}
 .log{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:8px;height:96px;overflow:auto;font-size:14px;margin:10px 0}
@@ -60,7 +60,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
 const EL={Fire:'🔥',Water:'💧',Nature:'🌿'};
 const BEATS={Fire:'Nature',Nature:'Water',Water:'Fire'};
 const FX={burn:'🔥 Burn',weak:'⬇️ Weaken',stun:'💫 Stun'};
-const CARDS=[
+let CARDS=[
 {id:1,name:'Gordon’s Crowbar',em:'🔧',el:'Nature',r:'Common',atk:9,def:5,hp:40,spd:6,sk:'Headcrab Smash',fx:'stun'},
 {id:2,name:'Portal Cake',em:'🍰',el:'Fire',r:'Rare',atk:12,def:3,hp:34,spd:7,sk:'Lie Bomb',fx:'burn'},
 {id:3,name:'Heavy’s Sandvich',em:'🥪',el:'Nature',r:'Common',atk:7,def:8,hp:52,spd:3,sk:'Mighty Munch',fx:'weak'},
@@ -79,8 +79,8 @@ function mk(c,m=1){return{...c,atk:Math.round(c.atk*m),hp:Math.round(c.hp*m),max
 
 function menu(){
 $.innerHTML=`<h1>🃏 Steam Card Clash</h1><p class="mu">1v1 turn-based battles with a squad of 5 trading cards. No healing.</p>
-<div class="col"><button class="p" onclick="alert('Steam sign-in needs a server (OpenID + Steam Web API). This prototype uses test cards.')">Sign in with Steam</button>
-<div class="note">Test mode: 8 sample cards loaded.</div>
+<div class="col">${USER?`<div class="note">Signed in as <b>${USER.name}</b> · <a href="/api/steam?action=logout">Sign out</a></div>`:`<button class="p" onclick="location.href='/api/steam?action=login'">Sign in with Steam</button>`}
+<div class="note">${S.cardMsg||'Test mode: 8 sample cards loaded.'}</div>
 <h2>Choose a mode</h2>
 <button onclick="pick('dungeon')">🏰 Dungeon (3 floors, damage carries over)</button>
 <button onclick="pick('ai')">🤖 Duel vs AI</button>
@@ -160,7 +160,7 @@ ev.forEach(e=>{
 setTimeout(()=>{
 const me=e.w=='me',A=q(me?'.me .ball':'.foe .ball'),D=q(me?'.foe .ball':'.me .ball');
 if(!A||!D)return;
-if(e.t=='swap'){A.style.zIndex=3;const up=A.animate([{transform:'none'},{transform:'translateY(-480px)'}],{duration:420,easing:'ease-in',fill:'forwards'});setTimeout(()=>{up.cancel();A.textContent=e.em;A.animate([{transform:'translateY(-480px)'},{transform:'none',offset:.7},{transform:'translateY(-22px)',offset:.85},{transform:'none'}],{duration:480,easing:'ease-in'}).onfinish=()=>A.style.zIndex=''},430);return}
+if(e.t=='swap'){A.style.zIndex=3;const up=A.animate([{transform:'none'},{transform:'translateY(-480px)'}],{duration:420,easing:'ease-in',fill:'forwards'});setTimeout(()=>{up.cancel();A.innerHTML=e.em;A.animate([{transform:'translateY(-480px)'},{transform:'none',offset:.7},{transform:'translateY(-22px)',offset:.85},{transform:'none'}],{duration:480,easing:'ease-in'}).onfinish=()=>A.style.zIndex=''},430);return}
 if(e.t=='blk'){const b=document.createElement('div');b.style.cssText=`position:absolute;width:124px;height:124px;border-radius:50%;left:${A.offsetLeft+A.offsetWidth/2-62}px;top:${A.offsetTop+A.offsetHeight/2-62}px;background:radial-gradient(circle at 30% 28%,rgba(255,255,255,.4),rgba(90,160,255,.16) 55%,rgba(90,160,255,.38));border:2px solid rgba(170,215,255,.75);box-shadow:0 0 20px rgba(90,160,255,.65),inset 0 0 18px rgba(150,200,255,.45);z-index:4;pointer-events:none`;A.parentElement.appendChild(b);bub[e.w]=b;b.animate([{transform:'scale(.3)',opacity:0},{transform:'scale(1.12)',opacity:1,offset:.7},{transform:'scale(1)',opacity:1}],{duration:300});return}
 const k=me?1:-1;A.style.zIndex=3;
 A.animate([{transform:'none'},{transform:`translate(${-k*18}px,${k*10}px) scale(.95)`,offset:.2},{transform:`translate(${k*110}px,${-k*90}px) scale(${e.t=='sp'?1.45:1.2})`,offset:.5},{transform:'none'}],{duration:620,easing:'ease-in-out'}).onfinish=()=>A.style.zIndex='';
@@ -223,5 +223,17 @@ const msg=win?(nxt?`Floor ${S.floor} cleared!`:'🏆 Victory!'):'💀 Defeated';
 const left=alive(S.B.me).length;
 $.innerHTML=`<h1>${msg}</h1><p class="mu">${timeout||''}${nxt?`${left} of ${SQ} balls survive. There is no healing, so wounds carry over.`:'Thanks for playing the prototype.'}</p>
 <div class="col">${nxt?'<button class="p" onclick="S.floor++;newBattle()">Next floor</button>':'<button class="p" onclick="pick(S.mode)">Play again</button>'}<button onclick="menu()">Main menu</button></div>`}
-menu();
+const TEST=CARDS.slice();let USER=null;
+async function loadCards(){
+S.cardMsg='Loading your trading cards…';menu();
+try{const r=await fetch('/api/steam?action=cards');const d=await r.json();
+if(!r.ok){S.cardMsg=d.error=='private'?'Your Steam inventory is private. Set it to public in Steam privacy settings, then reload.':d.error=='rate'?'Steam is rate limiting us. Try again in a minute.':'Could not load cards. Using test cards.';CARDS=TEST}
+else if(d.cards.length<SQ){S.cardMsg=`Found ${d.cards.length} trading cards (need ${SQ}). Using test cards.`;CARDS=TEST}
+else{CARDS=d.cards;S.cardMsg=`Loaded ${d.cards.length} trading cards from your Steam inventory.`}
+}catch(e){S.cardMsg='Could not reach the server. Using test cards.';CARDS=TEST}
+menu()}
+async function init(){
+try{const r=await fetch('/api/steam?action=me');if(r.ok)USER=await r.json()}catch(e){}
+menu();if(USER)loadCards()}
+init();
 </script></body></html>
