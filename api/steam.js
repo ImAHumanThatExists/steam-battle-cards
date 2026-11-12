@@ -1,7 +1,8 @@
 // Steam sign-in (OpenID 2.0) + trading card import for Steam Card Clash.
 // Deploy on Vercel. Env vars: SESSION_SECRET (required), STEAM_API_KEY (optional, for display name).
 const crypto = require('crypto');
-const SECRET = process.env.SESSION_SECRET || '';
+// No environment variable needed. For a bit more safety, change this text to anything random.
+const SECRET = process.env.SESSION_SECRET || 'change-this-to-any-random-text';
 const b64 = s => Buffer.from(s).toString('base64url');
 const sign = p => crypto.createHmac('sha256', SECRET).update(p).digest('base64url');
 const makeToken = id => { const p = b64(JSON.stringify({ id, exp: Date.now() + 7 * 864e5 })); return p + '.' + sign(p); };
@@ -62,7 +63,6 @@ module.exports = async (req, res) => {
   const u = new URL(req.url, 'http://x'), a = u.searchParams.get('action');
   const origin = `https://${req.headers['x-forwarded-host'] || req.headers.host}`;
   const json = (s, b) => { res.status(s).setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(b)); };
-  if (!SECRET) return json(500, { error: 'SESSION_SECRET is not set' });
   const back = `${origin}/api/steam?action=callback`;
 
   if (a === 'login') {
@@ -94,6 +94,12 @@ module.exports = async (req, res) => {
   if (!id) return json(401, { error: 'not signed in' });
   if (a === 'me') {
     let name = null, avatar = null;
+    if (!process.env.STEAM_API_KEY) {
+      try {
+        const x = await (await fetch(`https://steamcommunity.com/profiles/${id}?xml=1`)).text();
+        name = (/<steamID><!\[CDATA\[(.*?)\]\]><\/steamID>/.exec(x) || [])[1] || null;
+      } catch {}
+    }
     if (process.env.STEAM_API_KEY) {
       try {
         const r = await fetch(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=${process.env.STEAM_API_KEY}&steamids=${id}`);
@@ -101,7 +107,7 @@ module.exports = async (req, res) => {
       } catch {}
     }
     res.setHeader('Cache-Control', 'no-store');
-    return json(200, { steamid: id, name: name || 'Steam user ' + id.slice(-4), avatar });
+    return json(200, { steamid: id, name: esc(name || 'Steam user ' + id.slice(-4)), avatar });
   }
   if (a === 'cards') {
     const r = await loadCards(id);
