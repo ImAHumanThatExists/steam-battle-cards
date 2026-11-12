@@ -31,7 +31,7 @@ function toCard(d) {
   const icon = String(d.icon_url || '').replace(/[^\w-]/g, '');
   return {
     id: 'c' + d.classid,
-    name: esc(d.name).replace(/\s*\(Foil\)$/i, ''),
+    name: esc(d.name).replace(/\s*\((Foil )?Trading Card\)$/i, '').replace(/\s*\(Foil\)$/i, ''),
     em: `<img class="ci" src="https://community.cloudflare.steamstatic.com/economy/image/${icon}/96fx96f" alt="">`,
     el: EL[h % 3], r,
     atk: Math.round((6 + g(3, 9)) * k), def: Math.round((3 + g(7, 8)) * k),
